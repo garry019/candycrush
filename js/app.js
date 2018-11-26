@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+  var mov=0;
+  var img1= '';
+  var img2 = '';
+  var img1SRC = '';
+  var img2SRC = '';
+  var cont = 0;
+
   blink(); //Titulo efecto blink
 
   $('.btn-reinicio').on('click',function(){
@@ -60,38 +67,29 @@ $(document).ready(function(){
       for (var f = 1; f <= 7; f++) { //recorremos las 7 filas de cada columna buscando img
         if ($(".col-"+f).children("img:nth-child("+c+")").html() == null) { //buscamos nodos que no contengan una img
           var num = Math.floor((Math.random() * 4) + 1);
-          $(".col-"+f).prepend("<img class= 'elemento fila"+c+"' src='image/"+num+".png'>"); //Si se encuentran nodos agregamos el elmento usando prepend, pues append no funciona bien en este caso
+          $(".col-"+f).prepend("<img class= 'elemento' src='image/"+num+".png'>"); //Si se encuentran nodos agregamos el elmento usando prepend, pues append no funciona bien en este caso
         }
       }
     }
     $('.elemento').draggable({
+      disabled: false,
+      containment: '.panel-tablero',
       revert: true,
-      zIndex: 1,
-      cancel: false
+      revertDuration: 0,
+      snap: '.elemento',
+      snapMode: 'inner',
+      snapTolerance: 40,
+      start: function(event, ui){
+        mov=mov+1;
+        $("#movimientos-text").html(mov)
+      },
+      zIndex: 1
     });
+    verticalCheck();
   }
 
   function gameOver(){
     alert('Game Over Function');
-  }
-
-  function jugar(){
-    var img1= '';
-    var img2 = '';
-    var img1SRC = '';
-    var img2SRC = '';
-    $('.elemento').on('mousedown',function(){
-      img1 = $(this);
-      img1SRC = $(this).attr('src');
-    });
-    $('.elemento').on('mouseup',function(){
-      img2 = $(this);
-      img2SRC = $(this).attr('src');
-      img2.attr('src',img1SRC);
-      img1.attr('src',img2SRC);
-      console.log(img1SRC+' '+img2SRC);
-      verticalCheck();
-    });
   }
 
   function verticalCheck(){
@@ -127,7 +125,7 @@ $(document).ready(function(){
     if(destruir.length > 0){
       setTimeout(function(){
         for(i=0;i<destruir.length;i++){
-          destruir[i].remove();
+          destruir[i].detach();
         }
       },500);
       setTimeout(function(){
@@ -138,8 +136,22 @@ $(document).ready(function(){
       },500);
     }
     if(destruir.length == 0){
-      jugar();
+      $('.elemento').mousedown(function(){
+        img1 = $(this);
+        img1SRC = img1.attr('src');
+        cont = 1;
+      });
+      $('.elemento').mouseup(function(){
+        if(cont == 1){
+          img2 = $(this);
+          img2SRC = img2.attr('src');
+          img2.attr('src',img1SRC);
+          img1.attr('src',img2SRC);
+          console.log(img1.attr('src')+' '+img2.attr('src'));
+          cont = 0;
+          verticalCheck();
+        }
+      });
     }
   }
-
 });
