@@ -17,10 +17,15 @@ $(document).ready(function(){
   })
 
   function init(){
-    temporizador();
-    cargarTablero();
-    verticalCheck();
-    horizontalCheck();
+    var buttonText = $('.btn-reinicio').html();
+    if(buttonText == 'Iniciar'){
+      $('.btn-reinicio').html('Reiniciar');
+      temporizador();
+      cargarTablero();
+    }
+    if(buttonText == 'Reiniciar'){
+        console.log('Reiniciar');
+    }
   }
 
   function blink(){
@@ -43,8 +48,8 @@ $(document).ready(function(){
 
   function temporizador(){
     var reloj = setInterval(mostrarReloj, 1000);
-    var minutos = 1;
-    var segundos = 59;
+    var minutos = 0;
+    var segundos = 10;
     function mostrarReloj() {
       if(segundos < 10){
         $('#timer').html('0' + minutos + ':' + '0' + segundos);
@@ -67,11 +72,12 @@ $(document).ready(function(){
   }
 
   function cargarTablero(){
-    for (var c = 1; c <= 7; c++) { // Repetimos el proces descrito abajo en cada una de las 7 columnas
-      for (var f = 1; f <= 7; f++) { //recorremos las 7 filas de cada columna buscando img
-        if ($(".col-"+f).children("img:nth-child("+c+")").html() == null) { //buscamos nodos que no contengan una img
+    for (var c = 1; c <= 7; c++) {
+      for (var f = 1; f <= 7; f++) {
+        if ($(".col-"+f).children("img:nth-child("+c+")").html() == null) {
           var num = Math.floor((Math.random() * 4) + 1);
-          $(".col-"+f).prepend("<img class= 'elemento' src='image/"+num+".png'>"); //Si se encuentran nodos agregamos el elmento usando prepend, pues append no funciona bien en este caso
+          $(".col-"+f).prepend("<img class= 'elemento' src='image/"+num+".png'>");
+          var x = $('.elemento').position();
         }
       }
     }
@@ -101,16 +107,12 @@ $(document).ready(function(){
         cont = 0;
         setTimeout(function(){
             eliminar();
-        },1000);
+        },500);
       }
     });
     setTimeout(function(){
         eliminar();
-    },1000);
-  }
-
-  function gameOver(){
-    alert('Game Over Function');
+    },500);
   }
 
   function horizontalCheck()
@@ -161,18 +163,36 @@ $(document).ready(function(){
     rbv = verticalCheck();
     if(rbh == 1 || rbv == 1)
     {
-      $(".elemento").draggable({ disabled: true });
+      $('.elemento').draggable({ disabled: true });
       $("div[class^='col']").css("justify-content","flex-end")
       $(".activo").hide("pulsate",2000,function(){
         var scoretmp = $(".activo").length;
         $(".activo").remove("img");
         setTimeout(function(){
           cargarTablero();
-        },2000);
+        },1000);
         score = score + scoretmp;
         $("#score-text").html(score);
       })
     }
   }
-  
+
+  function gameOver(){
+    $('.elemento').draggable({ disabled: true });
+    $('.elemento').detach();
+    $('.panel-tablero').animate({
+      width: 0,
+      height: 0,
+      opacity: 0,
+      border: 0
+    },1000,function(){
+
+    });
+    $('.panel-score').animate({
+      width: '100%'
+    },1000,function(){
+
+    });
+  }
+
 });
