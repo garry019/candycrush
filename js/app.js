@@ -6,6 +6,9 @@ $(document).ready(function(){
   var img1SRC = '';
   var img2SRC = '';
   var cont = 0;
+  var rbh;
+  var rbv;
+  var score = 0;
 
   blink(); //Titulo efecto blink
 
@@ -17,6 +20,7 @@ $(document).ready(function(){
     temporizador();
     cargarTablero();
     verticalCheck();
+    horizontalCheck();
   }
 
   function blink(){
@@ -73,85 +77,102 @@ $(document).ready(function(){
     }
     $('.elemento').draggable({
       disabled: false,
-      containment: '.panel-tablero',
       revert: true,
-      revertDuration: 0,
-      snap: '.elemento',
-      snapMode: 'inner',
-      snapTolerance: 40,
       start: function(event, ui){
-        mov=mov+1;
+        mov++;
         $("#movimientos-text").html(mov)
       },
       zIndex: 1
     });
+    horizontalCheck();
     verticalCheck();
+    $('.elemento').mousedown(function(){
+      img1 = $(this);
+      img1SRC = img1.attr('src');
+      cont = 1;
+    });
+    $('.elemento').mouseup(function(){
+      if(cont == 1){
+        img2 = $(this);
+        img2SRC = img2.attr('src');
+        img2.attr('src',img1SRC);
+        img1.attr('src',img2SRC);
+        console.log(img1.attr('src')+' '+img2.attr('src'));
+        cont = 0;
+        setTimeout(function(){
+            eliminar();
+        },1000);
+      }
+    });
+    setTimeout(function(){
+        eliminar();
+    },1000);
   }
 
   function gameOver(){
     alert('Game Over Function');
   }
 
-  function verticalCheck(){
-    var candy;
-    var candyPrev;
-    var contador = 0;
-    var destruir = [];
-    var coincidencias = [];
-    var columnas = $('div[class^="col-"]');
-    columnas.each(function(){
-      var candysPerColumn = $(this).find('.elemento');
-      for(i=1;i<candysPerColumn.length;i++){
-        candy = candysPerColumn.eq(i);
-        prevCandy = candysPerColumn.eq(i-1);
-        if(candy.attr('src') == prevCandy.attr('src')){
-          if(contador == 0){
-            coincidencias.push(candy);
-            coincidencias.push(prevCandy);
-          }
-          if(contador > 0){
-            coincidencias.push(candy);
-            destruir = $.merge(destruir,coincidencias);
-            coincidencias = [];
-          }
-          contador++;
-        }else{
-          coincidencias = [];
-          contador = 0;
+  function horizontalCheck()
+  {
+    var bh=0;
+    for(j=1;j<8;j++)
+    {
+      for(k=1;k<6;k++)
+      {
+        var res1=$(".col-"+k).children("img:nth-last-child("+j+")").attr("src")
+        var res2=$(".col-"+(k+1)).children("img:nth-last-child("+j+")").attr("src")
+        var res3=$(".col-"+(k+2)).children("img:nth-last-child("+j+")").attr("src")
+        if((res1==res2) && (res2==res3) && (res1!=null) && (res2!=null) && (res3!=null))
+        {
+            $(".col-"+k).children("img:nth-last-child("+(j)+")").attr("class","elemento activo")
+            $(".col-"+(k+1)).children("img:nth-last-child("+(j)+")").attr("class","elemento activo")
+            $(".col-"+(k+2)).children("img:nth-last-child("+(j)+")").attr("class","elemento activo")
+            bh=1;
         }
       }
-      contador = 0;
-    });
-    if(destruir.length > 0){
-      setTimeout(function(){
-        for(i=0;i<destruir.length;i++){
-          destruir[i].detach();
-        }
-      },500);
-      setTimeout(function(){
-        cargarTablero();
-      },500);
-      setTimeout(function(){
-        verticalCheck();
-      },500);
     }
-    if(destruir.length == 0){
-      $('.elemento').mousedown(function(){
-        img1 = $(this);
-        img1SRC = img1.attr('src');
-        cont = 1;
-      });
-      $('.elemento').mouseup(function(){
-        if(cont == 1){
-          img2 = $(this);
-          img2SRC = img2.attr('src');
-          img2.attr('src',img1SRC);
-          img1.attr('src',img2SRC);
-          console.log(img1.attr('src')+' '+img2.attr('src'));
-          cont = 0;
-          verticalCheck();
+    return bh;
+  }
+
+  function verticalCheck(){
+    var bv=0;
+    for(l=1;l<6;l++)
+    {
+      for(k=1;k<8;k++)
+      {
+        var res1=$(".col-"+k).children("img:nth-child("+l+")").attr("src")
+        var res2=$(".col-"+k).children("img:nth-child("+(l+1)+")").attr("src")
+        var res3=$(".col-"+k).children("img:nth-child("+(l+2)+")").attr("src")
+        if((res1==res2) && (res2==res3) && (res1!=null) && (res2!=null) && (res3!=null))
+        {
+            $(".col-"+k).children("img:nth-child("+(l)+")").attr("class","elemento activo")
+            $(".col-"+k).children("img:nth-child("+(l+1)+")").attr("class","elemento activo")
+            $(".col-"+k).children("img:nth-child("+(l+2)+")").attr("class","elemento activo")
+            bv=1;
         }
-      });
+      }
+    }
+    return bv;
+  }
+
+  function eliminar(){
+    rbh = horizontalCheck();
+    rbv = verticalCheck();
+    if(rbh == 1 || rbv == 1)
+    {
+      $(".elemento").draggable({ disabled: true });
+      $("div[class^='col']").css("justify-content","flex-end")
+      $(".activo").hide("pulsate",2000,function(){
+        var scoretmp = $(".activo").length;
+        $(".activo").remove("img");
+        setTimeout(function(){
+          cargarTablero();
+        },2000);
+        score = score + scoretmp;
+        $("#score-text").html(score);
+      })
     }
   }
+  
 });
