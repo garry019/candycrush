@@ -9,6 +9,7 @@ $(document).ready(function(){
   var rbh;
   var rbv;
   var score = 0;
+  var reloj;
 
   blink(); //Titulo efecto blink
 
@@ -24,7 +25,38 @@ $(document).ready(function(){
       cargarTablero();
     }
     if(buttonText == 'Reiniciar'){
-        console.log('Reiniciar');
+      if($("#timer").html() == '00:00'){
+        $('.panel-tablero').animate({
+          width: '70%',
+          height: '700px',
+          opacity: 1
+        },1000,function(){
+          $('.panel-tablero').css({
+            border: '10px solid #E87306'
+          });
+        });
+        $('.panel-score').animate({
+          width: '25%'
+        },1000);
+        mov = 0;
+        score = 0;
+        $("#movimientos-text").html(mov);
+        $("#score-text").html(score);
+        $('.btn-reinicio').html('Iniciar');
+        $("#timer").html('02:00');
+      }else{
+        $('.elemento').detach();
+        window.clearInterval(reloj);
+        mov = 0;
+        score = 0;
+        minutos = 1;
+        segundos = 59;
+        $("#movimientos-text").html(mov);
+        $("#score-text").html(score);
+        $("#timer").html('02:00');
+        temporizador();
+        cargarTablero();
+      }
     }
   }
 
@@ -47,21 +79,22 @@ $(document).ready(function(){
   }
 
   function temporizador(){
-    var reloj = setInterval(mostrarReloj, 1000);
-    var minutos = 0;
-    var segundos = 10;
+    var minutos = 1;
+    var segundos = 59;
+    $("#timer").html('02:00');
+    reloj = setInterval(mostrarReloj, 1000);
     function mostrarReloj() {
       if(segundos < 10){
         $('#timer').html('0' + minutos + ':' + '0' + segundos);
-        if(minutos < 1){
-          $('#timer').toggleClass('warning');
-        }
       }else{
         $('#timer').html('0' + minutos + ':' + segundos);
       }
       if(minutos == 0 && segundos == 0){
         window.clearInterval(reloj);
         gameOver();
+      }
+      if(minutos < 1 && segundos < 10){
+        $('#timer').toggleClass('warning');
       }
       segundos--;
       if(segundos < 0){
@@ -86,7 +119,7 @@ $(document).ready(function(){
       revert: true,
       start: function(event, ui){
         mov++;
-        $("#movimientos-text").html(mov)
+        $("#movimientos-text").html(mov);
       },
       zIndex: 1
     });
@@ -103,7 +136,6 @@ $(document).ready(function(){
         img2SRC = img2.attr('src');
         img2.attr('src',img1SRC);
         img1.attr('src',img2SRC);
-        console.log(img1.attr('src')+' '+img2.attr('src'));
         cont = 0;
         setTimeout(function(){
             eliminar();
@@ -185,14 +217,10 @@ $(document).ready(function(){
       height: 0,
       opacity: 0,
       border: 0
-    },1000,function(){
-
-    });
+    },1000);
     $('.panel-score').animate({
       width: '100%'
-    },1000,function(){
-
-    });
+    },1000);
   }
 
 });

@@ -102,3 +102,6 @@ div[class^='col']{
   height: 96px;
   z-index: 10;
 }
+.warning{
+  color: red;
+}
